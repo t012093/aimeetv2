@@ -10,6 +10,8 @@
 import { createAuthServiceFromEnv } from '../services/google-auth.js';
 import { CalendarService } from '../services/calendar.js';
 import { createMinutesGeneratorFromEnv } from '../processors/minutes-generator.js';
+import { createClaudeMinutesGeneratorFromEnv } from '../processors/minutes-generator-claude.js';
+import { createGeminiMinutesGeneratorFromEnv } from '../processors/minutes-generator-gemini.js';
 import { createOrchestratorFromEnv } from '../processors/meeting-orchestrator.js';
 import dotenv from 'dotenv';
 import * as readline from 'readline';
@@ -28,6 +30,18 @@ function question(prompt: string): Promise<string> {
       resolve(answer);
     });
   });
+}
+
+function createMinutesGeneratorBasedOnProvider() {
+  const aiProvider = process.env.AI_PROVIDER || 'openai';
+
+  if (aiProvider === 'claude') {
+    return createClaudeMinutesGeneratorFromEnv();
+  } else if (aiProvider === 'gemini') {
+    return createGeminiMinutesGeneratorFromEnv();
+  } else {
+    return createMinutesGeneratorFromEnv();
+  }
 }
 
 async function selectProjectType(): Promise<string> {
@@ -85,7 +99,7 @@ async function main() {
       console.log('\n📝 Processing audio file...\n');
 
       const authService = createAuthServiceFromEnv();
-      const minutesGenerator = createMinutesGeneratorFromEnv();
+      const minutesGenerator = createMinutesGeneratorBasedOnProvider();
       const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator);
 
       const result = await orchestrator.processMeeting({
@@ -180,7 +194,7 @@ async function handleCalendarEvent() {
 
   console.log('🤖 Sending bot to meeting...\n');
 
-  const minutesGenerator = createMinutesGeneratorFromEnv();
+  const minutesGenerator = createMinutesGeneratorBasedOnProvider();
   const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator, projectType);
 
   const result = await orchestrator.processMeeting({
@@ -202,7 +216,7 @@ async function handleMeetingUrl() {
   console.log('🤖 Sending bot to meeting...\n');
 
   const authService = createAuthServiceFromEnv();
-  const minutesGenerator = createMinutesGeneratorFromEnv();
+  const minutesGenerator = createMinutesGeneratorBasedOnProvider();
   const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator, projectType);
 
   const result = await orchestrator.processMeeting({
@@ -224,7 +238,7 @@ async function handleAudioFile() {
   console.log('📝 Processing audio file...\n');
 
   const authService = createAuthServiceFromEnv();
-  const minutesGenerator = createMinutesGeneratorFromEnv();
+  const minutesGenerator = createMinutesGeneratorBasedOnProvider();
   const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator, projectType);
 
   const result = await orchestrator.processMeeting({
