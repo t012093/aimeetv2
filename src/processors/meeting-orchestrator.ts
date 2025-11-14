@@ -32,6 +32,7 @@ export interface ProcessMeetingParams {
   // Common
   calendarEventId?: string;
   templateName?: 'default' | 'npo' | 'government';
+  projectType?: 'international' | 'programming' | 'art' | 'default';
   context?: any; // Additional context for template
   method?: TranscriptionMethod; // Explicit method selection
 }
@@ -209,9 +210,11 @@ export class MeetingOrchestrator {
     if (this.slackService) {
       try {
         console.log('📢 Posting to Slack...');
-        await this.slackService.postMeetingMinutes(eventTitle, minutes, notionUrl, meetLink);
+        const projectType = (params.projectType as any) || 'default';
+        await this.slackService.postMeetingMinutes(eventTitle, minutes, notionUrl, meetLink, projectType);
         slackPosted = true;
-        console.log('✅ Posted to Slack');
+        const channel = this.slackService.getChannelForProject(projectType);
+        console.log(`✅ Posted to Slack (#${channel})`);
       } catch (error) {
         errors.push(`Failed to post to Slack: ${error}`);
         console.error('❌ Slack error:', error);
