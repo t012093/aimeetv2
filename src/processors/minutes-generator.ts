@@ -14,6 +14,14 @@ export interface MeetingMinutes {
   nextMeetingAgenda?: NextMeetingAgenda;
   rawTranscript: string;
   generatedAt: string;
+  // Interview-specific fields
+  candidateProfile?: CandidateProfile;
+  candidateMotivation?: CandidateMotivation;
+  candidateStrengths?: CandidateStrengths;
+  availability?: CandidateAvailability;
+  concerns?: InterviewConcern[];
+  aiEvaluation?: AIEvaluation;
+  interviewerNotes?: string;
 }
 
 export interface ActionItem {
@@ -68,6 +76,59 @@ export interface AgendaTopic {
   estimatedDuration: number; // minutes
   presenter?: string;
   materials?: string[];
+}
+
+// Interview-specific interfaces
+export interface CandidateProfile {
+  name: string;
+  age?: string;
+  currentSituation: string;
+  whyNow: string;
+  background?: string;
+}
+
+export interface CandidateMotivation {
+  applicationReason: string;
+  expectations: string[];
+  idealInvolvement: string;
+  dealBreakers?: string[];
+}
+
+export interface CandidateStrengths {
+  skills: Array<{
+    skill: string;
+    evidence: string;
+  }>;
+  personality: string;
+  uniqueExperience?: string;
+}
+
+export interface CandidateAvailability {
+  startDate: string;
+  commitment: string;
+  constraints?: string[];
+}
+
+export interface InterviewConcern {
+  issue: string;
+  impact: string;
+  needsFollowUp: boolean;
+}
+
+export interface AIEvaluation {
+  overallScore: number; // 0-100
+  recommendation: '採用推奨' | '条件付き採用' | '保留' | '不採用';
+  reasoning: string;
+  criteria: {
+    skillMatch: { score: number; comment: string };
+    cultureFit: { score: number; comment: string };
+    motivation: { score: number; comment: string };
+    commitment: { score: number; comment: string };
+    communication: { score: number; comment: string };
+  };
+  strengths: string[];
+  risks: string[];
+  conditions?: string;
 }
 
 export interface MinutesTemplate {
@@ -231,90 +292,130 @@ ${transcript}`;
 };
 
 /**
- * 採用面接用テンプレート
+ * 採用面接用テンプレート（応募者フォーカス + AI自動判定）
  */
 export const INTERVIEW_TEMPLATE: MinutesTemplate = {
   name: 'interview',
-  systemPrompt: `あなたは採用面接の記録作成専門家です。候補者の適性評価と採用判断に必要な情報を構造化して記録します。
+  systemPrompt: `あなたは採用面接の評価専門家です。応募者の特徴・希望・適性を深く分析し、客観的な採用判定を行います。
 
-**記録のポイント**:
-- 候補者のバックグラウンド、スキル、経験を明確に記載
-- 志望動機とキャリアビジョンの把握
-- 組織との適合性（カルチャーフィット）の評価
-- 具体的な質問への回答内容
-- 懸念事項や確認が必要な点
-- 次のステップ（採用判断、追加面接など）
+**最重要ポイント**:
+1. 応募者の「なぜ今この活動に応募したのか」を深掘りする
+2. 応募者が「何を期待し、何を求めているのか」を明確にする
+3. 具体的なエピソードベースでスキル・人柄を評価する
+4. 5つの評価軸で客観的にスコアリング（各20点満点、合計100点）
+5. スコアに基づいて明確な採用判定を下す
+
+**評価基準**:
+- スキル適合度（20点）: 必要なスキル・経験との適合度
+- カルチャーフィット（20点）: 組織の価値観・文化との適合度
+- モチベーション（20点）: 活動への熱意・継続意欲
+- コミットメント（20点）: 実際にコミットできる時間・エネルギー
+- コミュニケーション（20点）: 協働・コミュニケーション能力
+
+**判定基準**:
+- 85-100点: 採用推奨（即戦力として期待できる）
+- 70-84点: 条件付き採用（条件次第で採用）
+- 50-69点: 保留（追加情報・面接が必要）
+- 0-49点: 不採用（適合度が低い）
 
 以下の形式でJSON形式で出力してください：
 {
-  "summary": "面接の概要（候補者の印象と評価の要約、2-3文）",
-  "candidateInfo": {
+  "summary": "応募者の第一印象と総合評価（2-3文で簡潔に）",
+  "candidateProfile": {
     "name": "候補者名",
     "age": "年齢",
-    "currentRole": "現職・前職",
-    "yearsOfExperience": "経験年数",
-    "education": "学歴（わかる場合）",
-    "location": "居住地（わかる場合）"
+    "currentSituation": "現在の状況（例：IT企業退職予定、大学生、フリーランスなど）",
+    "whyNow": "なぜ今この活動に応募したのか（背景・きっかけ）",
+    "background": "これまでの経歴・経験の要約"
   },
-  "keyPoints": [
-    "候補者の強み1",
-    "候補者の強み2",
-    "特筆すべき経験やスキル",
-    ...
-  ],
-  "motivation": {
-    "reason": "応募動機・理由",
-    "careerGoals": "キャリアビジョン・将来の目標",
-    "interest": "組織・活動への関心のポイント"
+  "candidateMotivation": {
+    "applicationReason": "応募の具体的な理由",
+    "expectations": [
+      "この活動に期待すること1",
+      "この活動に期待すること2",
+      "得たい経験・スキル"
+    ],
+    "idealInvolvement": "理想的な関わり方（時間、頻度、役割など）",
+    "dealBreakers": ["譲れない条件があれば記載"]
   },
-  "skills": [
-    {
-      "category": "スキルカテゴリ（例：技術、コミュニケーション、リーダーシップ）",
-      "items": ["具体的なスキル1", "具体的なスキル2"],
-      "level": "高/中/初級"
-    }
-  ],
-  "cultureFit": {
-    "strengths": ["組織にマッチする点1", "組織にマッチする点2"],
-    "concerns": ["懸念点や確認が必要な点（あれば）"],
-    "overallAssessment": "全体的なカルチャーフィット評価"
+  "candidateStrengths": {
+    "skills": [
+      {
+        "skill": "スキル名（例：プログラミング、企画力など）",
+        "evidence": "具体的なエピソード・実績"
+      }
+    ],
+    "personality": "人柄・コミュニケーションスタイル（具体的なやり取りから判断）",
+    "uniqueExperience": "ユニークな経験・視点があれば記載"
   },
-  "qAndA": [
-    {
-      "question": "面接官からの質問",
-      "answer": "候補者の回答要約"
-    }
-  ],
   "availability": {
-    "startDate": "開始可能時期",
-    "commitment": "活動可能な頻度・時間",
-    "constraints": "制約事項（あれば）"
+    "startDate": "活動開始可能時期",
+    "commitment": "コミット可能な時間・頻度（例：週1回ミーティング）",
+    "constraints": ["制約事項があれば記載"]
   },
   "concerns": [
     {
-      "issue": "懸念事項",
-      "severity": "high/medium/low",
-      "needsFollowUp": true/false
+      "issue": "懸念点（活動継続の障害になりそうな点）",
+      "impact": "活動への具体的な影響",
+      "needsFollowUp": true
     }
   ],
-  "nextSteps": [
-    "次のステップ1（例：追加面接の実施）",
-    "次のステップ2（例：リファレンスチェック）"
-  ],
-  "interviewerNotes": "面接官の所感・メモ",
-  "recommendation": {
-    "decision": "採用推奨/保留/不採用推奨",
-    "reasoning": "推奨理由",
-    "conditions": "条件付き採用の場合の条件（あれば）"
+  "aiEvaluation": {
+    "overallScore": 85,
+    "recommendation": "採用推奨",
+    "reasoning": "判定理由を3-5文で具体的に説明。なぜこのスコア・判定になったのか。",
+    "criteria": {
+      "skillMatch": {
+        "score": 18,
+        "comment": "必要なスキル・経験との適合度の評価"
+      },
+      "cultureFit": {
+        "score": 17,
+        "comment": "組織の価値観・文化との適合度の評価"
+      },
+      "motivation": {
+        "score": 18,
+        "comment": "活動への熱意・継続意欲の評価"
+      },
+      "commitment": {
+        "score": 15,
+        "comment": "実際にコミットできる時間・エネルギーの評価"
+      },
+      "communication": {
+        "score": 17,
+        "comment": "協働・コミュニケーション能力の評価"
+      }
+    },
+    "strengths": [
+      "採用すべき具体的な理由1",
+      "採用すべき具体的な理由2",
+      "採用すべき具体的な理由3"
+    ],
+    "risks": [
+      "懸念点1（あれば）",
+      "懸念点2（あれば）"
+    ],
+    "conditions": "条件付き採用の場合の条件"
   },
-  "participants": ["面接官名1", "面接官名2", "候補者名"]
+  "interviewerNotes": "面接官の感覚的な印象や気づき",
+  "nextSteps": [
+    "次のアクション1（例：SlackコミュニティURL送付）",
+    "次のアクション2（例：初回ミーティング参加案内）"
+  ],
+  "participants": ["面接官名", "候補者名"]
 }
 
 重要な指示：
-- 候補者のプライバシーに配慮し、必要な情報のみを記載
-- 評価は客観的かつ具体的に
-- ポジティブな面とネガティブな面をバランスよく記載
-- 採用判断に必要な情報を網羅的に記録`,
+- **応募者の視点で記録**：なぜ応募したのか、何を求めているのかにフォーカス
+- **具体的なエピソード重視**：抽象的な評価ではなく、具体的な発言・経験から判断
+- **客観的なスコアリング必須**：5つの評価軸で必ず数値評価（各0-20点）
+- **明確な判定**：スコア合計から以下のように判定
+  * 85-100点: "採用推奨"
+  * 70-84点: "条件付き採用"
+  * 50-69点: "保留"
+  * 0-49点: "不採用"
+- プライバシー配慮：必要最小限の情報のみ
+- バランス評価：強みだけでなくリスクも記載`,
   userPromptTemplate: (transcript: string, context?: any) => {
     const contextStr = context
       ? `\n\n【面接情報】\nポジション: ${context.position || '不明'}\n募集背景: ${context.background || '不明'}\n`
