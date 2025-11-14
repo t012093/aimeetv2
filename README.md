@@ -1,219 +1,477 @@
-# AIMeet - AI-Powered Meeting Automation
+# 🤖 AIMeet - AI-Powered NPO Meeting Automation
 
-自動議事録生成 & AI秘書システム for NPO運営
+**NPO運営を革新する、AI駆動の会議自動化・議事録作成システム**
 
-## Features
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### Phase 1: MCP Calendar & Meet Secretary
-- 自然言語でカレンダー予定作成
-- Google Meet リンク自動付与
-- 定例ミーティング設定
-- 参加者自動招待
+---
 
-### Phase 2: Auto Meeting Minutes
-- ✅ Google Meet Transcript 自動取得 (Workspace Pro)
-- ✅ **Whisper API 音声ファイル文字起こし** (無料プランでも利用可能!)
-- ✅ **Recall.ai AIボット自動録画・文字起こし** (完全自動!)
-- ✅ OpenAI による要約・TODO抽出
-- ✅ Notion / Slack 自動投稿
-- ✅ NPO/行政向けテンプレート対応
+## 📖 目次
 
-### Phase 3: Full Integration (Planned)
-- タスク管理連携
-- 日次リマインド
-- プロジェクト横断分析
+- [特徴](#-特徴)
+- [デモ](#-デモ)
+- [クイックスタート](#-クイックスタート)
+- [セットアップ](#️-セットアップ)
+- [使い方](#-使い方)
+- [マルチプロジェクト対応](#-マルチプロジェクト対応)
+- [ドキュメント](#-ドキュメント)
+- [ロードマップ](#️-ロードマップ)
+- [トラブルシューティング](#-トラブルシューティング)
+- [貢献](#-貢献)
 
-## Architecture
+---
 
-```
-flowchart LR
-    User[User] --> MCP[MCP Server]
-    MCP --> GCal[Google Calendar API]
-    MCP --> GMeet[Google Meet API]
+## ✨ 特徴
 
-    Meet[Meeting] --> Event[Workspace Events]
-    Event --> Backend[Transcript Processor]
-    Backend --> OpenAI[OpenAI API]
-    OpenAI --> Destinations[Notion/Docs/Slack]
-```
+### 🎯 現在利用可能な機能
 
-## Quick Start
+#### 📝 AI議事録自動生成
+- **Recall.ai連携**: 会議に自動参加するAIボットが録画・文字起こし
+- **マルチAI対応**: Claude / GPT-4 / Gemini から選択可能
+- **柔軟な出力**: 会議内容に応じて自動調整（軽い会議は簡潔に、重要な会議は詳細に）
+- **創造的なトーン**: 堅苦しくない、前向きで読みやすい表現
 
-**超簡単な使い方: [README_SIMPLE.md](README_SIMPLE.md) をご覧ください**
+#### 📊 Notion統合
+- **マルチプロジェクト対応**: 3つの専用データベース
+  - 🌍 国際交流プロジェクト
+  - 💻 子供プログラミング教室
+  - 🎨 アート支援プロジェクト
+- **詳細なフォーマット**: テーブル、タイムライン、リスク分析など
 
-### 最も簡単な使い方（Recall.ai Bot）
+#### 💬 Slack連携
+- 議事録の自動投稿
+- アクションアイテムの通知
+
+#### 🎤 音声文字起こし
+- Whisper API対応（音声ファイルから議事録生成）
+- Google Meet Transcript（Workspace Pro）
+
+---
+
+## 🎬 デモ
+
+### 1️⃣ たった1コマンドで会議を記録
 
 ```bash
-# たった1つのコマンド
 ./bot https://meet.google.com/xxx-xxxx-xxx
 ```
 
-### 初回セットアップ
+AIボットが会議に参加 → 自動録画 → 文字起こし → 議事録生成 → Notion/Slack投稿
+
+### 2️⃣ 会議終了後に議事録を取得
 
 ```bash
-# 1. 依存関係をインストール
+./finish
+```
+
+最新の会議から議事録を自動生成
+
+### 3️⃣ プロジェクトごとに出力先を指定
+
+```bash
+npm run process-meeting -- --bot <bot-id> --project programming
+```
+
+プログラミング教室の専用Notionデータベースに保存
+
+---
+
+## 🚀 クイックスタート
+
+### 必要なもの
+
+- Node.js 18以上
+- npm または yarn
+- Recall.ai アカウント（無料プランあり）
+- Notion アカウント
+- Claude / OpenAI / Gemini APIキー（いずれか1つ）
+
+### 5分でセットアップ
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/t012093/aimeetv2.git
+cd aimeetv2
+
+# 2. 依存関係をインストール
 npm install
 
-# 2. 環境変数を設定
+# 3. 環境変数を設定
 cp .env.example .env
-# .env を編集して API Keys を設定
-
-# 3. Google アカウント認証（オプション）
-npm run auth
+# .envを編集してAPIキーを設定
 
 # 4. ビルド
 npm run build
 
-# 5. 完了！
+# 5. 完了！早速使ってみましょう
+./bot https://meet.google.com/your-meeting-link
 ```
 
-詳細な手順:
-- [Getting Started Guide](GETTING_STARTED.md) - ステップバイステップガイド
-- [Google Cloud Setup](docs/google-cloud-setup.md) - API 設定詳細
-- [Quick Start (Phase 1)](docs/quickstart.md) - MCP カレンダー秘書
-- [Phase 2 Guide](docs/phase2-transcript.md) - 自動議事録生成
+---
 
-## Usage Examples
+## ⚙️ セットアップ
 
-### Phase 1: AI Calendar Secretary
+### 1. 環境変数の設定
 
-Claude Desktop で自然言語で指示するだけ:
-
-```
-「明日の14:00から1時間、プロジェクト定例を入れて」
-```
-
-```
-「来週水曜の10:00〜11:30で、理事会ミーティング。Google Meet で。」
-```
-
-```
-「毎週火曜の19:00〜20:00で、ボランティア運営ミーティングを作って」
-```
-
-AI が自動的に:
-- ✅ カレンダーイベント作成
-- ✅ Google Meet リンク付与
-- ✅ 参加者への招待メール送信
-
-### Phase 2: Auto Meeting Minutes
-
-#### Option A: Google Meet API (Workspace Pro)
-会議終了後、CLI で:
+`.env` ファイルを作成し、以下を設定：
 
 ```bash
-npm run process-meeting -- --recent
+# AI Provider (claude, openai, or gemini)
+AI_PROVIDER=claude
+
+# Anthropic Claude
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
+
+# または OpenAI
+OPENAI_API_KEY=sk-proj-xxxxx
+
+# または Google Gemini
+GEMINI_API_KEY=AIzaSyxxxxx
+
+# Notion
+NOTION_API_KEY=ntn_xxxxx
+NOTION_MEETING_DATABASE_ID=xxxxx  # デフォルトDB
+
+# プロジェクト別データベース（オプション）
+NOTION_INTERNATIONAL_DATABASE_ID=xxxxx
+NOTION_PROGRAMMING_DATABASE_ID=xxxxx
+NOTION_ART_DATABASE_ID=xxxxx
+
+# Slack（オプション）
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxxxx
+
+# Recall.ai
+RECALL_API_KEY=xxxxx
+RECALL_REGION=us-west-2
 ```
 
-#### Option B: Whisper API (無料プランOK!)
-会議を録音して、音声ファイルを処理:
+### 2. Notion データベースの準備
+
+1. Notionで新しいデータベースを作成
+2. 最低限必要なプロパティ:
+   - `Name` (Title): ページタイトル
+3. データベースIDをURLから取得
+   - 例: `https://notion.so/1c5e773472ce80788fd0d1e3812ea0d4?v=...`
+   - → `1c5e773472ce80788fd0d1e3812ea0d4` がデータベースID
+
+詳細: [マルチプロジェクトセットアップガイド](docs/multi-project-setup.md)
+
+### 3. Recall.ai APIキーの取得
+
+1. [Recall.ai](https://www.recall.ai/) でアカウント作成
+2. APIキーを発行
+3. `.env` に `RECALL_API_KEY` として設定
+
+詳細: [Recall.ai統合ガイド](docs/recall-integration.md)
+
+---
+
+## 💡 使い方
+
+### パターン1: リアルタイム会議記録（推奨）
+
+会議開始前または開始直後に：
+
+```bash
+# Meet URLを指定してボットを送信
+./bot https://meet.google.com/xxx-xxxx-xxx
+```
+
+ボットが会議に参加し、自動的に：
+- 📹 録画
+- 🎤 文字起こし
+- 🤖 AI議事録生成
+
+会議終了後：
+
+```bash
+# 最新の会議から議事録を取得
+./finish
+```
+
+---
+
+### パターン2: 録音済み音声から議事録作成
+
+会議を録音していた場合：
 
 ```bash
 npm run process-meeting -- --audio meeting.mp3
 ```
 
-**どちらの方法でも:**
-1. ✅ Transcript 自動取得
-2. ✅ OpenAI で要約生成 (Summary, Decisions, Action Items)
-3. ✅ Notion データベースに保存
-4. ✅ Slack チャンネルに通知
+---
 
-**出力例:**
+### パターン3: Google Meet Transcript（Workspace Pro限定）
 
-```
-📋 MEETING MINUTES
-============================================================
-
-📝 概要:
-Open Coral Networkのボランティア定例ミーティング。
-新規プログラムの企画検討と助成金申請状況を確認。
-
-🎯 アクションアイテム:
-  🔴 助成金の追加資料を提出 (山田) [2024-11-18]
-  🟡 プログラム資料の作成 (佐藤) [2024-12-01]
-
-📝 Notion: https://notion.so/page-id
-📢 Slack: Posted
+```bash
+npm run process-meeting -- --recent
 ```
 
-## Project Structure
+---
 
-```
-aimeet/
-├── src/
-│   ├── mcp/
-│   │   └── calendar-server.ts           # MCP Server for Calendar & Meet
-│   ├── services/
-│   │   ├── google-auth.ts               # Google OAuth 2.0 handler
-│   │   ├── calendar.ts                  # Calendar API wrapper
-│   │   ├── meet.ts                      # Meet API & Transcript
-│   │   ├── workspace-events.ts          # Workspace Events subscription
-│   │   ├── notion.ts                    # Notion API integration
-│   │   └── slack.ts                     # Slack webhook integration
-│   ├── processors/
-│   │   ├── minutes-generator.ts         # OpenAI summarizer + templates
-│   │   └── meeting-orchestrator.ts      # Workflow coordinator
-│   ├── scripts/
-│   │   ├── authenticate.ts              # Initial OAuth flow
-│   │   └── process-meeting.ts           # CLI processing tool
-│   └── index.ts
-├── docs/
-│   ├── google-cloud-setup.md            # Google Cloud configuration
-│   ├── quickstart.md                    # Phase 1 quick start
-│   ├── phase2-transcript.md             # Phase 2 detailed guide
-│   └── architecture.md                  # System architecture
-├── GETTING_STARTED.md                   # Step-by-step setup guide
-└── README.md                            # This file
+### プロジェクト指定
+
+特定のプロジェクトのNotionデータベースに保存：
+
+```bash
+# 国際交流プロジェクト
+npm run process-meeting -- --bot <bot-id> --project international
+
+# 子供プログラミング教室
+npm run process-meeting -- --bot <bot-id> --project programming
+
+# アート支援プロジェクト
+npm run process-meeting -- --bot <bot-id> --project art
 ```
 
-## Documentation
+---
 
-- **[Getting Started](GETTING_STARTED.md)** - 最速セットアップガイド (30分)
-- **[Google Cloud Setup](docs/google-cloud-setup.md)** - API & OAuth 設定詳細
-- **[Phase 1: Quick Start](docs/quickstart.md)** - MCP Calendar 秘書の使い方
-- **[Phase 2: Auto Minutes](docs/phase2-transcript.md)** - 議事録自動化ガイド (Google Meet API)
-- **[Whisper Integration](docs/whisper-guide.md)** - 音声ファイルから議事録生成 (無料プランOK!)
-- **[Architecture](docs/architecture.md)** - システムアーキテクチャと設計思想
-- **[Current Spec](docs/current-spec.md)** - 実装済み機能と今後の拡張要件の最新版仕様まとめ
+## 🎨 マルチプロジェクト対応
 
-## Roadmap
+AIMeetは複数のNPOプロジェクトを並行管理できます。
 
-### Phase 1 ✅ (Complete)
-- [x] Project setup & architecture
-- [x] MCP Calendar & Meet server
-- [x] OAuth 2.0 authentication flow
-- [x] Calendar event CRUD operations
-- [x] Google Meet link auto-generation
-- [x] Claude Desktop integration
-- [x] Recurring meetings support
+### 設定されているプロジェクト
 
-### Phase 2 ✅ (Complete)
-- [x] Meet API Transcript retrieval (Workspace Pro)
-- [x] **Whisper API audio transcription (works with free plans!)**
-- [x] Conference Record management
-- [x] OpenAI GPT-4 summarization
-- [x] Template system (default, NPO, government)
-- [x] Notion API integration
-- [x] Slack webhook integration
-- [x] CLI processing tool with audio file support
+| プロジェクト | 説明 | コマンド |
+|:-----------|:-----|:---------|
+| 🌍 国際交流 | 国際交流・異文化理解プログラム | `--project international` |
+| 💻 プログラミング | 子供向けプログラミング教室 | `--project programming` |
+| 🎨 アート支援 | アート・文化支援活動 | `--project art` |
+| 📋 デフォルト | 一般的な会議 | `--project default` または省略 |
 
-### Phase 3 🚧 (In Progress)
-- [ ] Workspace Events API webhook automation
-- [ ] Cloud Run / Lambda deployment
-- [ ] Pub/Sub event subscription
-- [ ] Task management integration (ClickUp, Asana)
-- [ ] Daily summary reports
-- [ ] Weekly digest generation
+### 使い分けの例
 
-### Future 📋 (Planned)
-- [ ] Google Docs export
-- [ ] Real-time transcription
-- [ ] Multi-language support
-- [ ] Custom AI model fine-tuning
-- [ ] Dashboard UI
-- [ ] Project cross-analysis
-- [ ] Budget tracking integration
+```bash
+# 国際交流チームの定例会議
+./bot https://meet.google.com/intl-team-meeting
+# 会議後
+npm run process-meeting -- --bot <bot-id> --project international
 
-## License
+# プログラミング教室の講師ミーティング
+./bot https://meet.google.com/prog-teachers
+# 会議後
+npm run process-meeting -- --bot <bot-id> --project programming
+```
 
-MIT
+詳細: [マルチプロジェクトセットアップガイド](docs/multi-project-setup.md)
+
+---
+
+## 📚 ドキュメント
+
+### 📘 セットアップガイド
+- [Getting Started](GETTING_STARTED.md) - ステップバイステップのセットアップ
+- [Google Cloud Setup](docs/google-cloud-setup.md) - Google API設定（オプション）
+- [マルチプロジェクト設定](docs/multi-project-setup.md) - 複数データベース管理
+
+### 📗 使い方ガイド
+- [Quick Start](QUICK_START.md) - 最速で使い始める
+- [Recall.ai統合](docs/recall-integration.md) - AIボットの使い方
+- [Whisper統合](docs/whisper-guide.md) - 音声ファイルから議事録生成
+
+### 📙 技術ドキュメント
+- [アーキテクチャ](docs/architecture.md) - システム設計
+- [現在の仕様](docs/current-spec.md) - 実装済み機能一覧
+- [将来構想ロードマップ](docs/future-roadmap.md) - Phase 3-7の計画
+
+---
+
+## 🗺️ ロードマップ
+
+### ✅ Phase 1 & 2: 基本機能（完了）
+- AI議事録自動生成
+- Notion/Slack連携
+- マルチプロジェクト対応
+- 柔軟な出力フォーマット
+
+### 🚧 Phase 3: タスク管理（計画中）
+- GitHub Issues自動連携
+- アクションアイテムのIssue化
+- タスク進捗トラッキング
+
+### 📅 Phase 4: AIスケジュール調整（計画中）
+- Googleカレンダー統合
+- スプレッドシートからメンバー情報取得
+- AI駆動の最適日程提案
+
+### 💰 Phase 5: 会計AI自動化（計画中）
+- Stripe/GMO Payment連携
+- AI自動仕訳
+- freee統合
+
+### 💬 Phase 6: Slack高度連携（計画中）
+- 議事録自動共有
+- トーク要約機能
+- 対話型ボット
+
+### 🔗 Phase 7: ブロックチェーン報酬（長期）
+- AI貢献度評価
+- トークン報酬自動配布
+- DAOガバナンス
+
+詳細: [将来構想ロードマップ](docs/future-roadmap.md)
+
+---
+
+## 📊 出力例
+
+### Notion議事録ページ
+
+```
+📅 日付: 2025年11月14日 03:54
+👥 参加者: Network Coral, かおや
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 概要
+OpenAIの議事録作成機能のテストを実施。複数デバイスからの
+参加時における音声認識の精度検証が主な目的。
+
+💡 重要なポイント
+✨ OpenAI要約機能を活用した議事録作成のテスト実施
+✨ 複数アカウント・複数デバイスでの会議参加が必要
+✨ スマートフォンから発話、PCで出力されない状態での検証
+
+✅ 決定事項
+✔️ テストのために別アカウントでミーティングに参加する
+✔️ スマートフォンからの音声入力テストを実施する
+
+🎯 アクションアイテム
+┌──────┬────────────────┬────────┬──────┬──────┐
+│優先度│タスク          │担当者  │期限  │状態  │
+├──────┼────────────────┼────────┼──────┼──────┤
+│🔴    │複数デバイステスト│かおや  │未定  │⬜    │
+│🟡    │評価基準策定    │未定    │未定  │⬜    │
+└──────┴────────────────┴────────┴──────┴──────┘
+
+⚠️ 未解決事項
+🔴 1. 音声認識精度の検証方法
+   📌 背景: 具体的な評価方法が未定
+   💡 推奨: 定量的な評価指標を設定
+
+🤖 AIからの提案・アドバイス
+⚙️ 1. 段階的テストアプローチの採用 [重要]
+   理由: 問題の切り分けが容易になり、より正確な原因分析が可能
+
+🚀 次のステップ
+1. スマートフォンとPCの両方から会議に参加する
+2. テスト結果を分析し、精度を定量的に評価する
+```
+
+---
+
+## 🔧 トラブルシューティング
+
+### よくある問題
+
+#### ❌ `Missing NOTION_API_KEY or NOTION_MEETING_DATABASE_ID`
+
+**原因**: 環境変数が設定されていない
+
+**解決方法**:
+```bash
+# .envファイルを確認
+cat .env
+
+# 必要な変数が設定されているか確認
+echo $NOTION_API_KEY
+echo $NOTION_MEETING_DATABASE_ID
+```
+
+---
+
+#### ❌ `body failed validation: database_id should be a valid uuid`
+
+**原因**: NotionデータベースIDが正しくない
+
+**解決方法**:
+1. NotionでデータベースのURLを確認
+2. `https://notion.so/DATABASE_ID?v=...` の `DATABASE_ID` 部分をコピー
+3. `.env` の該当する変数に設定
+
+---
+
+#### ❌ Recall.aiボットが会議に参加できない
+
+**原因**: Meet URLが正しくない、または会議がロックされている
+
+**解決方法**:
+1. Meet URLが正しいか確認
+2. 会議の参加設定を確認（組織外のユーザーを許可）
+3. ボットが参加リクエストを送った際に、手動で承認
+
+---
+
+#### ❌ AI生成の議事録が空または不完全
+
+**原因**: 音声認識が失敗、またはAPIの制限
+
+**解決方法**:
+1. 音声品質を確認（雑音が多くないか）
+2. APIキーの使用量制限を確認
+3. 別のAIプロバイダーを試す（Claude → GPT-4など）
+
+---
+
+### ログの確認
+
+```bash
+# 詳細なログを表示
+npm run process-meeting -- --bot <bot-id> 2>&1 | tee meeting.log
+```
+
+---
+
+## 🤝 貢献
+
+### バグ報告・機能リクエスト
+
+[GitHub Issues](https://github.com/t012093/aimeetv2/issues) で報告してください。
+
+### プルリクエスト
+
+1. フォーク
+2. フィーチャーブランチ作成 (`git checkout -b feature/amazing-feature`)
+3. コミット (`git commit -m 'Add amazing feature'`)
+4. プッシュ (`git push origin feature/amazing-feature`)
+5. プルリクエストを作成
+
+---
+
+## 📞 サポート
+
+- **ドキュメント**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/t012093/aimeetv2/issues)
+- **ディスカッション**: [GitHub Discussions](https://github.com/t012093/aimeetv2/discussions)
+
+---
+
+## 📄 ライセンス
+
+MIT License - 詳細は [LICENSE](LICENSE) を参照
+
+---
+
+## 🙏 謝辞
+
+このプロジェクトは以下の素晴らしいオープンソースプロジェクトに支えられています：
+
+- [Recall.ai](https://www.recall.ai/) - 会議録画・文字起こし
+- [Anthropic Claude](https://www.anthropic.com/) - AI議事録生成
+- [OpenAI](https://openai.com/) - GPT-4 & Whisper
+- [Notion API](https://developers.notion.com/) - データベース統合
+- [Google APIs](https://developers.google.com/) - Calendar & Meet
+
+---
+
+<div align="center">
+
+**🚀 NPO運営を、もっとスマートに。**
+
+Made with ❤️ by the AIMeet Team
+
+[Getting Started](GETTING_STARTED.md) · [Documentation](docs/) · [Roadmap](docs/future-roadmap.md)
+
+</div>
