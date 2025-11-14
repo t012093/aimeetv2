@@ -34,10 +34,11 @@
 - **創造的なトーン**: 堅苦しくない、前向きで読みやすい表現
 
 #### 📊 Notion統合
-- **マルチプロジェクト対応**: 3つの専用データベース
+- **マルチプロジェクト対応**: 4つの専用データベース
   - 🌍 国際交流プロジェクト
   - 💻 子供プログラミング教室
   - 🎨 アート支援プロジェクト
+  - 💼 面接（採用）プロジェクト
 - **詳細なフォーマット**: テーブル、タイムライン、リスク分析など
 
 #### 💬 Slack連携
@@ -55,26 +56,29 @@
 ### 1️⃣ たった1コマンドで会議を記録
 
 ```bash
-./bot https://meet.google.com/xxx-xxxx-xxx
+./bot
 ```
 
-AIボットが会議に参加 → 自動録画 → 文字起こし → 議事録生成 → Notion/Slack投稿
+対話形式で以下を選択：
+- 録音方法（カレンダーイベント / Meet URL / 音声ファイル）
+- プロジェクトタイプ（🌍国際交流 / 💻プログラミング / 🎨アート / 💼面接）
 
-### 2️⃣ 会議終了後に議事録を取得
+AIボットが会議に参加 → 自動録画 → 文字起こし → 議事録生成 → プロジェクト別にNotion/Slack投稿
+
+### 2️⃣ プロジェクトごとに自動振り分け
+
+選択したプロジェクトタイプに応じて：
+- 専用Notionデータベースに保存
+- 専用Slackチャンネルに通知
+- プロジェクト固有のフォーマットで出力
+
+### 3️⃣ 会議終了後の処理
 
 ```bash
-./finish
+npm run process-meeting -- --bot <bot-id>
 ```
 
-最新の会議から議事録を自動生成
-
-### 3️⃣ プロジェクトごとに出力先を指定
-
-```bash
-npm run process-meeting -- --bot <bot-id> --project programming
-```
-
-プログラミング教室の専用Notionデータベースに保存
+録音開始時に選択したプロジェクトタイプがBotメタデータから自動的に復元されます
 
 ---
 
@@ -106,7 +110,7 @@ cp .env.example .env
 npm run build
 
 # 5. 完了！早速使ってみましょう
-./bot https://meet.google.com/your-meeting-link
+./bot
 ```
 
 ---
@@ -138,6 +142,7 @@ NOTION_MEETING_DATABASE_ID=xxxxx  # デフォルトDB
 NOTION_INTERNATIONAL_DATABASE_ID=xxxxx
 NOTION_PROGRAMMING_DATABASE_ID=xxxxx
 NOTION_ART_DATABASE_ID=xxxxx
+NOTION_INTERVIEW_DATABASE_ID=xxxxx
 
 # Slack（オプション）
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxxxx
@@ -170,30 +175,51 @@ RECALL_REGION=us-west-2
 
 ## 💡 使い方
 
-### パターン1: リアルタイム会議記録（推奨）
-
-会議開始前または開始直後に：
+### パターン1: インタラクティブモード（最もシンプル・推奨）
 
 ```bash
-# Meet URLを指定してボットを送信
-./bot https://meet.google.com/xxx-xxxx-xxx
+./bot
 ```
+
+対話形式で以下を選択：
+1. 録音方法（カレンダー / URL / 音声ファイル）
+2. ミーティングを選択
+3. **プロジェクトタイプを選択**
+   - 🌍 国際交流
+   - 💻 プログラミング教室
+   - 🎨 アート支援
+   - 💼 面接
+   - 📋 デフォルト
 
 ボットが会議に参加し、自動的に：
 - 📹 録画
 - 🎤 文字起こし
 - 🤖 AI議事録生成
+- 📝 Notion投稿（プロジェクト別DB）
+- 💬 Slack通知（プロジェクト別チャンネル）
+
+---
+
+### パターン2: リアルタイム会議記録（CLIモード）
+
+会議開始前または開始直後に：
+
+```bash
+npm run record
+```
+
+対話形式で設定を選択し、ボットを送信。
 
 会議終了後：
 
 ```bash
 # 最新の会議から議事録を取得
-./finish
+npm run process-meeting -- --bot <bot-id>
 ```
 
 ---
 
-### パターン2: 録音済み音声から議事録作成
+### パターン3: 録音済み音声から議事録作成
 
 会議を録音していた場合：
 
@@ -203,7 +229,7 @@ npm run process-meeting -- --audio meeting.mp3
 
 ---
 
-### パターン3: Google Meet Transcript（Workspace Pro限定）
+### パターン4: Google Meet Transcript（Workspace Pro限定）
 
 ```bash
 npm run process-meeting -- --recent
@@ -211,7 +237,7 @@ npm run process-meeting -- --recent
 
 ---
 
-### プロジェクト指定
+### プロジェクト指定（手動モード）
 
 特定のプロジェクトのNotionデータベースに保存：
 
@@ -224,7 +250,12 @@ npm run process-meeting -- --bot <bot-id> --project programming
 
 # アート支援プロジェクト
 npm run process-meeting -- --bot <bot-id> --project art
+
+# 面接（採用）プロジェクト
+npm run process-meeting -- --bot <bot-id> --project interview
 ```
+
+**注**: `./bot` を使えば、プロジェクトタイプを対話形式で選択できるため、`--project` フラグは不要です。
 
 ---
 
@@ -239,6 +270,7 @@ AIMeetは複数のNPOプロジェクトを並行管理できます。
 | 🌍 国際交流 | 国際交流・異文化理解プログラム | `--project international` |
 | 💻 プログラミング | 子供向けプログラミング教室 | `--project programming` |
 | 🎨 アート支援 | アート・文化支援活動 | `--project art` |
+| 💼 面接 | 採用・面接プロセス | `--project interview` |
 | 📋 デフォルト | 一般的な会議 | `--project default` または省略 |
 
 ### 使い分けの例
