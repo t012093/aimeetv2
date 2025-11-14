@@ -13,13 +13,15 @@ export interface SlackMemberMapping {
 
 export class SlackService {
   private webhookUrl: string;
+  private webhookUrlMapping: Record<ProjectType, string>;
   private memberMapping: SlackMemberMapping;
   private channelMapping: Record<ProjectType, string>;
 
   constructor(
     webhookUrl: string,
     memberMapping: SlackMemberMapping = {},
-    channelMapping?: Record<ProjectType, string>
+    channelMapping?: Record<ProjectType, string>,
+    webhookUrlMapping?: Record<ProjectType, string>
   ) {
     this.webhookUrl = webhookUrl;
     this.memberMapping = memberMapping;
@@ -29,6 +31,12 @@ export class SlackService {
       art: process.env.SLACK_ART_CHANNEL || 'general',
       default: process.env.SLACK_DEFAULT_CHANNEL || 'general',
     };
+    this.webhookUrlMapping = webhookUrlMapping || {
+      international: process.env.SLACK_WEBHOOK_URL_INTERNATIONAL || webhookUrl,
+      programming: process.env.SLACK_WEBHOOK_URL_PROGRAMMING || webhookUrl,
+      art: process.env.SLACK_WEBHOOK_URL_ART || webhookUrl,
+      default: webhookUrl,
+    };
   }
 
   /**
@@ -36,6 +44,13 @@ export class SlackService {
    */
   getChannelForProject(projectType: ProjectType): string {
     return this.channelMapping[projectType];
+  }
+
+  /**
+   * Get Webhook URL for project type
+   */
+  private getWebhookUrlForProject(projectType: ProjectType): string {
+    return this.webhookUrlMapping[projectType];
   }
 
   /**
@@ -61,7 +76,10 @@ export class SlackService {
   ): Promise<void> {
     const message = this.formatMinutesMessage(title, minutes, notionUrl, meetLink, projectType);
 
-    const response = await fetch(this.webhookUrl, {
+    // Use project-specific webhook URL
+    const webhookUrl = this.getWebhookUrlForProject(projectType);
+
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -340,5 +358,13 @@ export function createSlackServiceFromEnv(): SlackService {
     default: process.env.SLACK_DEFAULT_CHANNEL || 'general',
   };
 
-  return new SlackService(webhookUrl, memberMapping, channelMapping);
+  // Load project-specific webhook URLs
+  const webhookUrlMapping: Record<ProjectType, string> = {
+    international: process.env.SLACK_WEBHOOK_URL_INTERNATIONAL || webhookUrl,
+    programming: process.env.SLACK_WEBHOOK_URL_PROGRAMMING || webhookUrl,
+    art: process.env.SLACK_WEBHOOK_URL_ART || webhookUrl,
+    default: webhookUrl,
+  };
+
+  return new SlackService(webhookUrl, memberMapping, channelMapping, webhookUrlMapping);
 }
