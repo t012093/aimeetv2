@@ -1,0 +1,43 @@
+#!/bin/bash
+# Generate minutes from completed recording
+# Usage: ./finish [bot-id]
+
+cd "$(dirname "$0")"
+
+BOT_ID=$1
+
+# If no bot ID provided, try to read from .last-bot file
+if [ -z "$BOT_ID" ]; then
+  if [ -f ".last-bot" ]; then
+    BOT_ID=$(cat .last-bot)
+    echo "📝 Using saved Bot ID: $BOT_ID"
+    echo ""
+  else
+    echo "❌ No Bot ID found!"
+    echo ""
+    echo "Usage: ./finish [bot-id]"
+    echo ""
+    echo "Example:"
+    echo "  ./finish 1cae48d7-c234-4a55-ad74-060a9b1e6ab7"
+    echo ""
+    echo "💡 Tip: Run './bot <url>' first to start recording"
+    exit 1
+  fi
+fi
+
+echo "🤖 AIMeet - Generating Minutes"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "📝 Processing bot: $BOT_ID"
+echo "⏳ Fetching transcript & generating minutes..."
+echo ""
+
+npm run process-meeting -- --bot "$BOT_ID" --output "meeting.md"
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ Done!"
+echo ""
+echo "📂 Files saved to:"
+echo "   - Record/YYYY/MM/meeting-*.md (議事録)"
+echo "   - Agenda/YYYY/MM/agenda-*.md (次回アジェンダ)"

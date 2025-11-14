@@ -1,0 +1,51 @@
+{
+  "name": "aimeet",
+  "version": "0.1.0",
+  "description": "AI-powered meeting automation with Google Meet & Calendar integration",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "auth": "tsx src/scripts/authenticate.ts",
+    "mcp:calendar": "node dist/mcp/calendar-server.js",
+    "mcp:calendar:dev": "tsx src/mcp/calendar-server.ts",
+    "process-meeting": "tsx src/scripts/process-meeting.ts",
+    "record": "tsx src/scripts/quick-record.ts",
+    "send-bot": "tsx src/scripts/send-bot.ts",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest"
+  },
+  "keywords": [
+    "google-meet",
+    "calendar",
+    "mcp",
+    "ai",
+    "meeting-notes",
+    "transcript"
+  ],
+  "author": "Naoya Kusunoki",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "@google/generative-ai": "^0.24.1",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@notionhq/client": "^2.2.15",
+    "dotenv": "^16.4.5",
+    "googleapis": "^144.0.0",
+    "openai": "^4.68.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

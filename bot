@@ -1,0 +1,19 @@
+#!/bin/bash
+# Quick recording start (no waiting)
+# Usage: ./bot <meet-url>
+
+MEET_URL=$1
+
+if [ -z "$MEET_URL" ]; then
+  echo "❌ Usage: ./bot <meet-url>"
+  echo ""
+  echo "Example:"
+  echo "  ./bot https://meet.google.com/abc-defg-hij"
+  echo ""
+  echo "📌 This command starts recording immediately and exits."
+  echo "   After your meeting, run: ./finish"
+  exit 1
+fi
+
+cd "$(dirname "$0")"
+npm run send-bot -- "$MEET_URL"

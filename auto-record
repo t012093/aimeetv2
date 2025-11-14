@@ -1,0 +1,33 @@
+#!/bin/bash
+# Fully automatic recording (waits for meeting to end)
+# Usage: ./auto-record <meet-url>
+
+MEET_URL=$1
+
+if [ -z "$MEET_URL" ]; then
+  echo "❌ Usage: ./auto-record <meet-url>"
+  echo ""
+  echo "Example:"
+  echo "  ./auto-record https://meet.google.com/abc-defg-hij"
+  echo ""
+  echo "ℹ️  This command will:"
+  echo "  1. Send bot to meeting"
+  echo "  2. Wait for meeting to complete"
+  echo "  3. Generate minutes & agenda automatically"
+  echo "  4. Save to Record/ and Agenda/"
+  echo ""
+  echo "💡 Tip: To start recording without waiting, use:"
+  echo "   ./start-recording <meet-url>"
+  exit 1
+fi
+
+echo "🤖 AIMeet - Automatic Recording"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "📍 Meeting URL: $MEET_URL"
+echo "⏳ Bot will wait for meeting to complete..."
+echo "   (Press Ctrl+C to cancel and process later)"
+echo ""
+
+cd "$(dirname "$0")"
+npm run process-meeting -- --meetUrl "$MEET_URL" --output "meeting.md"

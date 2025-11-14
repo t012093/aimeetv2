@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Google OAuth tokens
+token.json
+credentials.json
+
+# Recall.ai bot IDs
+bot-id.txt
+
+# Meeting records
+Record/
+Agenda/
+
+# Temporary files
+*.tmp
+*.temp

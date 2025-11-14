@@ -1,0 +1,28 @@
+#!/bin/bash
+# Start recording without waiting
+# Usage: ./start-recording <meet-url>
+
+MEET_URL=$1
+
+if [ -z "$MEET_URL" ]; then
+  echo "❌ Usage: ./start-recording <meet-url>"
+  echo ""
+  echo "Example:"
+  echo "  ./start-recording https://meet.google.com/abc-defg-hij"
+  exit 1
+fi
+
+echo "🤖 AIMeet - Recording Start"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "📍 Meeting URL: $MEET_URL"
+echo "🎥 Starting bot (no waiting)..."
+echo ""
+
+cd "$(dirname "$0")"
+npm run send-bot -- "$MEET_URL"
+
+echo ""
+echo "✅ Bot has been sent to the meeting!"
+echo "📝 After the meeting ends, run:"
+echo "   npm run process-meeting -- --bot <bot-id> --output meeting.md"
