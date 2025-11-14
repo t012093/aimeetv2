@@ -230,10 +230,107 @@ ${transcript}`;
   },
 };
 
+/**
+ * 採用面接用テンプレート
+ */
+export const INTERVIEW_TEMPLATE: MinutesTemplate = {
+  name: 'interview',
+  systemPrompt: `あなたは採用面接の記録作成専門家です。候補者の適性評価と採用判断に必要な情報を構造化して記録します。
+
+**記録のポイント**:
+- 候補者のバックグラウンド、スキル、経験を明確に記載
+- 志望動機とキャリアビジョンの把握
+- 組織との適合性（カルチャーフィット）の評価
+- 具体的な質問への回答内容
+- 懸念事項や確認が必要な点
+- 次のステップ（採用判断、追加面接など）
+
+以下の形式でJSON形式で出力してください：
+{
+  "summary": "面接の概要（候補者の印象と評価の要約、2-3文）",
+  "candidateInfo": {
+    "name": "候補者名",
+    "age": "年齢",
+    "currentRole": "現職・前職",
+    "yearsOfExperience": "経験年数",
+    "education": "学歴（わかる場合）",
+    "location": "居住地（わかる場合）"
+  },
+  "keyPoints": [
+    "候補者の強み1",
+    "候補者の強み2",
+    "特筆すべき経験やスキル",
+    ...
+  ],
+  "motivation": {
+    "reason": "応募動機・理由",
+    "careerGoals": "キャリアビジョン・将来の目標",
+    "interest": "組織・活動への関心のポイント"
+  },
+  "skills": [
+    {
+      "category": "スキルカテゴリ（例：技術、コミュニケーション、リーダーシップ）",
+      "items": ["具体的なスキル1", "具体的なスキル2"],
+      "level": "高/中/初級"
+    }
+  ],
+  "cultureFit": {
+    "strengths": ["組織にマッチする点1", "組織にマッチする点2"],
+    "concerns": ["懸念点や確認が必要な点（あれば）"],
+    "overallAssessment": "全体的なカルチャーフィット評価"
+  },
+  "qAndA": [
+    {
+      "question": "面接官からの質問",
+      "answer": "候補者の回答要約"
+    }
+  ],
+  "availability": {
+    "startDate": "開始可能時期",
+    "commitment": "活動可能な頻度・時間",
+    "constraints": "制約事項（あれば）"
+  },
+  "concerns": [
+    {
+      "issue": "懸念事項",
+      "severity": "high/medium/low",
+      "needsFollowUp": true/false
+    }
+  ],
+  "nextSteps": [
+    "次のステップ1（例：追加面接の実施）",
+    "次のステップ2（例：リファレンスチェック）"
+  ],
+  "interviewerNotes": "面接官の所感・メモ",
+  "recommendation": {
+    "decision": "採用推奨/保留/不採用推奨",
+    "reasoning": "推奨理由",
+    "conditions": "条件付き採用の場合の条件（あれば）"
+  },
+  "participants": ["面接官名1", "面接官名2", "候補者名"]
+}
+
+重要な指示：
+- 候補者のプライバシーに配慮し、必要な情報のみを記載
+- 評価は客観的かつ具体的に
+- ポジティブな面とネガティブな面をバランスよく記載
+- 採用判断に必要な情報を網羅的に記録`,
+  userPromptTemplate: (transcript: string, context?: any) => {
+    const contextStr = context
+      ? `\n\n【面接情報】\nポジション: ${context.position || '不明'}\n募集背景: ${context.background || '不明'}\n`
+      : '';
+
+    return `以下の採用面接の文字起こしから面接記録を作成してください：${contextStr}
+
+${transcript}`;
+  },
+};
+
 export const TEMPLATES: Record<string, MinutesTemplate> = {
   default: DEFAULT_TEMPLATE,
   npo: NPO_TEMPLATE,
   government: GOVERNMENT_TEMPLATE,
+  interview: INTERVIEW_TEMPLATE,
 };
 
 export class MinutesGenerator {

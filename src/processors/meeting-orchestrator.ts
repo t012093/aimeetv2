@@ -31,7 +31,7 @@ export interface ProcessMeetingParams {
 
   // Common
   calendarEventId?: string;
-  templateName?: 'default' | 'npo' | 'government';
+  templateName?: 'default' | 'npo' | 'government' | 'interview';
   projectType?: 'international' | 'programming' | 'art' | 'interview' | 'default';
   context?: any; // Additional context for template
   method?: TranscriptionMethod; // Explicit method selection
@@ -222,9 +222,25 @@ export class MeetingOrchestrator {
 
     // 3. Generate meeting minutes
     console.log('🤖 Generating meeting minutes with AI...');
+
+    // Auto-select template based on project type if not explicitly provided
+    let templateName = params.templateName;
+    if (!templateName) {
+      // Map project types to templates
+      const templateMap: Record<string, 'default' | 'npo' | 'government' | 'interview'> = {
+        interview: 'interview',
+        international: 'npo',
+        programming: 'npo',
+        art: 'npo',
+        default: 'default',
+      };
+      templateName = templateMap[projectType] || 'default';
+      console.log(`📋 Using template: ${templateName} (auto-selected from project type: ${projectType})`);
+    }
+
     const minutes = await this.minutesGenerator.generate(
       transcriptText,
-      params.templateName || 'default',
+      templateName,
       params.context
     );
 
@@ -280,7 +296,7 @@ export class MeetingOrchestrator {
    */
   async processMostRecentMeeting(
     calendarEventId: string,
-    templateName?: 'default' | 'npo' | 'government'
+    templateName?: 'default' | 'npo' | 'government' | 'interview'
   ): Promise<ProcessMeetingResult> {
     console.log(`🔍 Finding conference record for event: ${calendarEventId}`);
 
@@ -318,7 +334,7 @@ export class MeetingOrchestrator {
    */
   async processBatch(
     conferenceRecordNames: string[],
-    templateName?: 'default' | 'npo' | 'government'
+    templateName?: 'default' | 'npo' | 'government' | 'interview'
   ): Promise<ProcessMeetingResult[]> {
     const results: ProcessMeetingResult[] = [];
 
