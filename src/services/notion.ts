@@ -104,6 +104,378 @@ export class NotionService {
       },
     });
 
+    // Interview-specific fields
+    if (minutes.aiEvaluation) {
+      const evaluation = minutes.aiEvaluation;
+
+      // AI Judgment Callout
+      blocks.push({
+        object: 'block',
+        type: 'callout',
+        callout: {
+          icon: { emoji: '🤖' },
+          rich_text: [
+            {
+              type: 'text',
+              text: { content: `AI判定: ${evaluation.recommendation} (${evaluation.overallScore}/100点)` },
+              annotations: { bold: true }
+            }
+          ],
+          color: 'green_background',
+        },
+      });
+
+      blocks.push({
+        object: 'block',
+        type: 'divider',
+        divider: {},
+      });
+
+      // Candidate Profile
+      if (minutes.candidateProfile) {
+        const profile = minutes.candidateProfile;
+        blocks.push({
+          object: 'block',
+          type: 'heading_2',
+          heading_2: {
+            rich_text: [{ type: 'text', text: { content: '👤 候補者プロフィール' } }],
+          },
+        });
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [
+              { type: 'text', text: { content: '氏名: ' }, annotations: { bold: true } },
+              { type: 'text', text: { content: profile.name } }
+            ],
+          },
+        });
+        if (profile.age) {
+          blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [
+                { type: 'text', text: { content: '年齢: ' }, annotations: { bold: true } },
+                { type: 'text', text: { content: profile.age } }
+              ],
+            },
+          });
+        }
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [
+              { type: 'text', text: { content: '現在の状況: ' }, annotations: { bold: true } },
+              { type: 'text', text: { content: profile.currentSituation } }
+            ],
+          },
+        });
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [
+              { type: 'text', text: { content: 'なぜ今応募したか: ' }, annotations: { bold: true } },
+              { type: 'text', text: { content: profile.whyNow } }
+            ],
+          },
+        });
+        if (profile.background) {
+          blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [
+                { type: 'text', text: { content: '経歴: ' }, annotations: { bold: true } },
+                { type: 'text', text: { content: profile.background } }
+              ],
+            },
+          });
+        }
+      }
+
+      // Candidate Motivation
+      if (minutes.candidateMotivation) {
+        const motivation = minutes.candidateMotivation;
+        blocks.push({
+          object: 'block',
+          type: 'heading_2',
+          heading_2: {
+            rich_text: [{ type: 'text', text: { content: '💭 志望動機・期待' } }],
+          },
+        });
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [
+              { type: 'text', text: { content: '応募理由: ' }, annotations: { bold: true } },
+              { type: 'text', text: { content: motivation.applicationReason } }
+            ],
+          },
+        });
+        if (motivation.expectations && motivation.expectations.length > 0) {
+          blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [{ type: 'text', text: { content: '期待すること:' }, annotations: { bold: true } }],
+            },
+          });
+          motivation.expectations.forEach((exp: string) => {
+            blocks.push({
+              object: 'block',
+              type: 'bulleted_list_item',
+              bulleted_list_item: {
+                rich_text: [{ type: 'text', text: { content: exp } }],
+              },
+            });
+          });
+        }
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [
+              { type: 'text', text: { content: '理想的な関わり方: ' }, annotations: { bold: true } },
+              { type: 'text', text: { content: motivation.idealInvolvement } }
+            ],
+          },
+        });
+      }
+
+      // Candidate Strengths
+      if (minutes.candidateStrengths) {
+        const strengths = minutes.candidateStrengths;
+        blocks.push({
+          object: 'block',
+          type: 'heading_2',
+          heading_2: {
+            rich_text: [{ type: 'text', text: { content: '✨ 強み・特徴' } }],
+          },
+        });
+        if (strengths.skills && strengths.skills.length > 0) {
+          blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [{ type: 'text', text: { content: 'スキル・経験:' }, annotations: { bold: true } }],
+            },
+          });
+          strengths.skills.forEach((s: any) => {
+            blocks.push({
+              object: 'block',
+              type: 'bulleted_list_item',
+              bulleted_list_item: {
+                rich_text: [
+                  { type: 'text', text: { content: `${s.skill}: ` }, annotations: { bold: true } },
+                  { type: 'text', text: { content: s.evidence } }
+                ],
+              },
+            });
+          });
+        }
+        if (strengths.personality) {
+          blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [
+                { type: 'text', text: { content: '人柄: ' }, annotations: { bold: true } },
+                { type: 'text', text: { content: strengths.personality } }
+              ],
+            },
+          });
+        }
+        if (strengths.uniqueExperience) {
+          blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+              rich_text: [
+                { type: 'text', text: { content: 'ユニークな経験: ' }, annotations: { bold: true } },
+                { type: 'text', text: { content: strengths.uniqueExperience } }
+              ],
+            },
+          });
+        }
+      }
+
+      // AI Evaluation Details
+      blocks.push({
+        object: 'block',
+        type: 'heading_2',
+        heading_2: {
+          rich_text: [{ type: 'text', text: { content: '🤖 AI評価・判定' } }],
+        },
+      });
+      blocks.push({
+        object: 'block',
+        type: 'heading_3',
+        heading_3: {
+          rich_text: [{ type: 'text', text: { content: `総合評価: ${evaluation.overallScore}/100点` } }],
+        },
+      });
+      blocks.push({
+        object: 'block',
+        type: 'heading_3',
+        heading_3: {
+          rich_text: [
+            { type: 'text', text: { content: '判定: ' } },
+            { type: 'text', text: { content: evaluation.recommendation }, annotations: { bold: true } }
+          ],
+        },
+      });
+      blocks.push({
+        object: 'block',
+        type: 'paragraph',
+        paragraph: {
+          rich_text: [
+            { type: 'text', text: { content: '理由: ' }, annotations: { bold: true } },
+            { type: 'text', text: { content: evaluation.reasoning } }
+          ],
+        },
+      });
+
+      // Evaluation Criteria Table
+      if (evaluation.criteria) {
+        blocks.push({
+          object: 'block',
+          type: 'heading_3',
+          heading_3: {
+            rich_text: [{ type: 'text', text: { content: '評価詳細' } }],
+          },
+        });
+
+        const criteriaTableRows: any[] = [];
+        criteriaTableRows.push({
+          object: 'block',
+          type: 'table_row',
+          table_row: {
+            cells: [
+              [{ type: 'text', text: { content: '評価項目' } }],
+              [{ type: 'text', text: { content: 'スコア' } }],
+              [{ type: 'text', text: { content: 'コメント' } }],
+            ],
+          },
+        });
+
+        const criteriaItems = [
+          { name: 'スキル適合度', data: evaluation.criteria.skillMatch },
+          { name: 'カルチャーフィット', data: evaluation.criteria.cultureFit },
+          { name: 'モチベーション', data: evaluation.criteria.motivation },
+          { name: 'コミットメント', data: evaluation.criteria.commitment },
+          { name: 'コミュニケーション', data: evaluation.criteria.communication },
+        ];
+
+        criteriaItems.forEach(item => {
+          criteriaTableRows.push({
+            object: 'block',
+            type: 'table_row',
+            table_row: {
+              cells: [
+                [{ type: 'text', text: { content: item.name } }],
+                [{ type: 'text', text: { content: `${item.data.score}/20` } }],
+                [{ type: 'text', text: { content: item.data.comment } }],
+              ],
+            },
+          });
+        });
+
+        blocks.push({
+          object: 'block',
+          type: 'table',
+          table: {
+            table_width: 3,
+            has_column_header: true,
+            has_row_header: false,
+            children: criteriaTableRows,
+          },
+        });
+      }
+
+      // Strengths (reasons to hire)
+      if (evaluation.strengths && evaluation.strengths.length > 0) {
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [{ type: 'text', text: { content: '採用すべき理由:' }, annotations: { bold: true } }],
+          },
+        });
+        evaluation.strengths.forEach((s: string) => {
+          blocks.push({
+            object: 'block',
+            type: 'bulleted_list_item',
+            bulleted_list_item: {
+              rich_text: [{ type: 'text', text: { content: `✅ ${s}` } }],
+            },
+          });
+        });
+      }
+
+      // Risks/Concerns
+      if (evaluation.risks && evaluation.risks.length > 0) {
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [{ type: 'text', text: { content: '懸念点:' }, annotations: { bold: true } }],
+          },
+        });
+        evaluation.risks.forEach((r: string) => {
+          blocks.push({
+            object: 'block',
+            type: 'bulleted_list_item',
+            bulleted_list_item: {
+              rich_text: [{ type: 'text', text: { content: `⚠️ ${r}` } }],
+            },
+          });
+        });
+      }
+
+      // Conditions
+      if (evaluation.conditions) {
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [
+              { type: 'text', text: { content: '条件: ' }, annotations: { bold: true } },
+              { type: 'text', text: { content: evaluation.conditions } }
+            ],
+          },
+        });
+      }
+
+      // Interviewer Notes
+      if (minutes.interviewerNotes) {
+        blocks.push({
+          object: 'block',
+          type: 'heading_2',
+          heading_2: {
+            rich_text: [{ type: 'text', text: { content: '📝 面接官メモ' } }],
+          },
+        });
+        blocks.push({
+          object: 'block',
+          type: 'paragraph',
+          paragraph: {
+            rich_text: [{ type: 'text', text: { content: minutes.interviewerNotes } }],
+          },
+        });
+      }
+
+      blocks.push({
+        object: 'block',
+        type: 'divider',
+        divider: {},
+      });
+    }
+
     // Key Points
     if (minutes.keyPoints && minutes.keyPoints.length > 0) {
       blocks.push({

@@ -182,6 +182,78 @@ export class SlackService {
       },
     });
 
+    // Interview-specific fields
+    if (minutes.aiEvaluation) {
+      const evaluation = minutes.aiEvaluation;
+
+      // AI Judgment - Prominent callout
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*🤖 AI判定*\n:star: *${evaluation.recommendation}* (${evaluation.overallScore}/100点)\n\n${evaluation.reasoning}`,
+        },
+      });
+
+      // Candidate Profile
+      if (minutes.candidateProfile) {
+        const profile = minutes.candidateProfile;
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*👤 候補者プロフィール*\n*氏名:* ${profile.name}\n*年齢:* ${profile.age || '未記入'}\n*状況:* ${profile.currentSituation}\n*応募理由:* ${profile.whyNow}`,
+          },
+        });
+      }
+
+      // Evaluation Scores
+      if (evaluation.criteria) {
+        const criteria = evaluation.criteria;
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*📊 評価詳細*\n• スキル適合度: ${criteria.skillMatch.score}/20\n• カルチャーフィット: ${criteria.cultureFit.score}/20\n• モチベーション: ${criteria.motivation.score}/20\n• コミットメント: ${criteria.commitment.score}/20\n• コミュニケーション: ${criteria.communication.score}/20`,
+          },
+        });
+      }
+
+      // Strengths (top 3)
+      if (evaluation.strengths && evaluation.strengths.length > 0) {
+        const strengthsText = evaluation.strengths
+          .slice(0, 3)
+          .map(s => `• ${s}`)
+          .join('\n');
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*✅ 採用すべき理由*\n${strengthsText}`,
+          },
+        });
+      }
+
+      // Concerns (if any)
+      if (evaluation.risks && evaluation.risks.length > 0) {
+        const risksText = evaluation.risks
+          .slice(0, 2)
+          .map(r => `• ${r}`)
+          .join('\n');
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*⚠️ 懸念点*\n${risksText}`,
+          },
+        });
+      }
+
+      blocks.push({
+        type: 'divider',
+      });
+    }
+
     // Key Points
     if (minutes.keyPoints.length > 0) {
       const keyPointsText = minutes.keyPoints.map(point => `• ${point}`).join('\n');
