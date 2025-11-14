@@ -140,9 +140,11 @@ async function main() {
   if (values.conference) {
     console.log(`Processing conference: ${values.conference}\n`);
 
+    const templateName = values.template !== 'default' ? (values.template as any) : undefined;
+
     const result = await orchestrator.processMeeting({
       conferenceRecordName: values.conference,
-      templateName: values.template as any,
+      templateName,
     });
 
     displayResult(result);
@@ -153,9 +155,11 @@ async function main() {
   if (values.event) {
     console.log(`Processing by calendar event: ${values.event}\n`);
 
+    const templateName = values.template !== 'default' ? (values.template as any) : undefined;
+
     const result = await orchestrator.processMostRecentMeeting(
       values.event,
-      values.template as any
+      templateName
     );
 
     displayResult(result);
@@ -171,9 +175,13 @@ async function main() {
       process.exit(1);
     }
 
+    // Only pass templateName if explicitly specified (not default)
+    // This allows orchestrator to auto-select template from bot metadata
+    const templateName = values.template !== 'default' ? (values.template as any) : undefined;
+
     const result = await orchestrator.processMeeting({
       botId: values.bot,
-      templateName: values.template as any,
+      templateName,
     });
 
     displayResult(result);
@@ -194,10 +202,13 @@ async function main() {
       process.exit(1);
     }
 
+    // Only pass templateName if explicitly specified (not default)
+    const templateName = values.template !== 'default' ? (values.template as any) : undefined;
+
     const result = await orchestrator.processMeeting({
       meetingUrl: values.meetUrl,
       waitForCompletion: true,
-      templateName: values.template as any,
+      templateName,
     });
 
     displayResult(result);
@@ -218,9 +229,11 @@ async function main() {
       process.exit(1);
     }
 
+    const templateName = values.template !== 'default' ? (values.template as any) : undefined;
+
     const result = await orchestrator.processMeeting({
       audioFilePath: values.audio,
-      templateName: values.template as any,
+      templateName,
     });
 
     displayResult(result);
@@ -243,9 +256,11 @@ async function main() {
       process.exit(1);
     }
 
+    const templateName = values.template !== 'default' ? (values.template as any) : undefined;
+
     const result = await orchestrator.processMeeting({
       conferenceRecordName: conferences[0].name,
-      templateName: values.template as any,
+      templateName,
     });
 
     displayResult(result);
@@ -409,6 +424,103 @@ function formatResultAsMarkdown(result: any): string {
     result.minutes.nextSteps.forEach((step: string, index: number) => {
       lines.push(`${index + 1}. ${step}`);
     });
+    lines.push('');
+  }
+
+  // Interview-specific sections
+  if (result.minutes.candidateProfile) {
+    lines.push('## 👤 候補者プロフィール\n');
+    lines.push(`**氏名**: ${result.minutes.candidateProfile.name}`);
+    if (result.minutes.candidateProfile.age) {
+      lines.push(`**年齢**: ${result.minutes.candidateProfile.age}`);
+    }
+    lines.push(`**現在の状況**: ${result.minutes.candidateProfile.currentSituation}`);
+    lines.push(`**なぜ今応募したか**: ${result.minutes.candidateProfile.whyNow}`);
+    if (result.minutes.candidateProfile.background) {
+      lines.push(`**経歴**: ${result.minutes.candidateProfile.background}`);
+    }
+    lines.push('');
+  }
+
+  if (result.minutes.candidateMotivation) {
+    lines.push('## 💭 志望動機・期待\n');
+    lines.push(`**応募理由**: ${result.minutes.candidateMotivation.applicationReason}`);
+    if (result.minutes.candidateMotivation.expectations && result.minutes.candidateMotivation.expectations.length > 0) {
+      lines.push('\n**期待すること**:');
+      result.minutes.candidateMotivation.expectations.forEach((exp: string) => {
+        lines.push(`- ${exp}`);
+      });
+    }
+    lines.push(`\n**理想的な関わり方**: ${result.minutes.candidateMotivation.idealInvolvement}`);
+    if (result.minutes.candidateMotivation.dealBreakers && result.minutes.candidateMotivation.dealBreakers.length > 0) {
+      lines.push('\n**譲れない条件**:');
+      result.minutes.candidateMotivation.dealBreakers.forEach((db: string) => {
+        lines.push(`- ${db}`);
+      });
+    }
+    lines.push('');
+  }
+
+  if (result.minutes.candidateStrengths) {
+    lines.push('## ✨ 強み・特徴\n');
+    if (result.minutes.candidateStrengths.skills && result.minutes.candidateStrengths.skills.length > 0) {
+      lines.push('**スキル・経験**:');
+      result.minutes.candidateStrengths.skills.forEach((s: any) => {
+        lines.push(`- **${s.skill}**: ${s.evidence}`);
+      });
+      lines.push('');
+    }
+    if (result.minutes.candidateStrengths.personality) {
+      lines.push(`**人柄**: ${result.minutes.candidateStrengths.personality}\n`);
+    }
+    if (result.minutes.candidateStrengths.uniqueExperience) {
+      lines.push(`**ユニークな経験**: ${result.minutes.candidateStrengths.uniqueExperience}\n`);
+    }
+  }
+
+  if (result.minutes.aiEvaluation) {
+    const evaluation = result.minutes.aiEvaluation;
+    lines.push('## 🤖 AI評価・判定\n');
+    lines.push(`### 総合評価: ${evaluation.overallScore}/100点`);
+    lines.push(`### 判定: **${evaluation.recommendation}**\n`);
+    lines.push(`**理由**: ${evaluation.reasoning}\n`);
+
+    if (evaluation.criteria) {
+      lines.push('### 評価詳細\n');
+      lines.push('| 評価項目 | スコア | コメント |');
+      lines.push('|:---------|:------:|:---------|');
+      lines.push(`| スキル適合度 | ${evaluation.criteria.skillMatch.score}/20 | ${evaluation.criteria.skillMatch.comment} |`);
+      lines.push(`| カルチャーフィット | ${evaluation.criteria.cultureFit.score}/20 | ${evaluation.criteria.cultureFit.comment} |`);
+      lines.push(`| モチベーション | ${evaluation.criteria.motivation.score}/20 | ${evaluation.criteria.motivation.comment} |`);
+      lines.push(`| コミットメント | ${evaluation.criteria.commitment.score}/20 | ${evaluation.criteria.commitment.comment} |`);
+      lines.push(`| コミュニケーション | ${evaluation.criteria.communication.score}/20 | ${evaluation.criteria.communication.comment} |`);
+      lines.push('');
+    }
+
+    if (evaluation.strengths && evaluation.strengths.length > 0) {
+      lines.push('**採用すべき理由**:');
+      evaluation.strengths.forEach((s: string) => {
+        lines.push(`- ✅ ${s}`);
+      });
+      lines.push('');
+    }
+
+    if (evaluation.risks && evaluation.risks.length > 0) {
+      lines.push('**懸念点**:');
+      evaluation.risks.forEach((r: string) => {
+        lines.push(`- ⚠️ ${r}`);
+      });
+      lines.push('');
+    }
+
+    if (evaluation.conditions) {
+      lines.push(`**条件**: ${evaluation.conditions}\n`);
+    }
+  }
+
+  if (result.minutes.interviewerNotes) {
+    lines.push('## 📝 面接官メモ\n');
+    lines.push(result.minutes.interviewerNotes);
     lines.push('');
   }
 

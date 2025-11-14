@@ -57,6 +57,14 @@ ${template.userPromptTemplate(transcript, context)}`;
       risks: parsed.risks || [],
       nextSteps: parsed.nextSteps || [],
       nextMeetingAgenda: parsed.nextMeetingAgenda,
+      // Interview-specific fields
+      candidateProfile: parsed.candidateProfile,
+      candidateMotivation: parsed.candidateMotivation,
+      candidateStrengths: parsed.candidateStrengths,
+      availability: parsed.availability,
+      concerns: parsed.concerns,
+      aiEvaluation: parsed.aiEvaluation,
+      interviewerNotes: parsed.interviewerNotes,
       rawTranscript: transcript,
       generatedAt: new Date().toISOString(),
     };
