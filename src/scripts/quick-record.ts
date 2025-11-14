@@ -192,6 +192,10 @@ async function handleCalendarEvent() {
   // Select project type
   const projectType = await selectProjectType();
 
+  // Ask if user wants to wait for completion
+  const waitChoice = await question('\nWait for meeting to complete? (y/n, default: n): ');
+  const waitForCompletion = waitChoice.toLowerCase() === 'y';
+
   console.log('🤖 Sending bot to meeting...\n');
 
   const minutesGenerator = createMinutesGeneratorBasedOnProvider();
@@ -199,11 +203,23 @@ async function handleCalendarEvent() {
 
   const result = await orchestrator.processMeeting({
     meetingUrl: selectedEvent.meetLink,
-    waitForCompletion: true,
+    waitForCompletion: waitForCompletion,
     projectType: projectType as any,
   });
 
-  await saveResult(result, outputPath);
+  if (waitForCompletion) {
+    await saveResult(result, outputPath);
+  } else {
+    // Save bot ID for later use with ./finish
+    if (result.botId) {
+      fs.writeFileSync('.last-bot', result.botId, 'utf-8');
+      console.log('\n✅ Recording started!');
+      console.log(`📝 Bot ID: ${result.botId}`);
+      console.log('\n💡 To generate minutes after the meeting:');
+      console.log('   ./finish');
+      console.log('');
+    }
+  }
 }
 
 async function handleMeetingUrl() {
@@ -213,6 +229,10 @@ async function handleMeetingUrl() {
   // Select project type
   const projectType = await selectProjectType();
 
+  // Ask if user wants to wait for completion
+  const waitChoice = await question('\nWait for meeting to complete? (y/n, default: n): ');
+  const waitForCompletion = waitChoice.toLowerCase() === 'y';
+
   console.log('🤖 Sending bot to meeting...\n');
 
   const authService = createAuthServiceFromEnv();
@@ -221,11 +241,23 @@ async function handleMeetingUrl() {
 
   const result = await orchestrator.processMeeting({
     meetingUrl: meetUrl,
-    waitForCompletion: true,
+    waitForCompletion: waitForCompletion,
     projectType: projectType as any,
   });
 
-  await saveResult(result, outputPath);
+  if (waitForCompletion) {
+    await saveResult(result, outputPath);
+  } else {
+    // Save bot ID for later use with ./finish
+    if (result.botId) {
+      fs.writeFileSync('.last-bot', result.botId, 'utf-8');
+      console.log('\n✅ Recording started!');
+      console.log(`📝 Bot ID: ${result.botId}`);
+      console.log('\n💡 To generate minutes after the meeting:');
+      console.log('   ./finish');
+      console.log('');
+    }
+  }
 }
 
 async function handleAudioFile() {

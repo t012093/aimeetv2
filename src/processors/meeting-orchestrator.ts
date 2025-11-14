@@ -42,6 +42,7 @@ export interface ProcessMeetingResult {
   notionUrl?: string;
   slackPosted: boolean;
   errors: string[];
+  botId?: string; // Recall.ai Bot ID (if used)
 }
 
 export class MeetingOrchestrator {
@@ -82,6 +83,7 @@ export class MeetingOrchestrator {
     let transcriptText: string;
     let eventTitle = 'Untitled Meeting';
     let projectType = params.projectType || 'default';
+    let botId: string | undefined;
 
     // 1. Get transcript (from Google Meet API, Whisper, or Recall.ai bot)
     if (params.meetingUrl || params.botId) {
@@ -131,13 +133,39 @@ export class MeetingOrchestrator {
         throw new Error('Either meetingUrl or botId must be provided for Recall.ai bot');
       }
 
-      // Get transcript
-      console.log('📝 Fetching transcript from Recall.ai...');
-      const transcript = await this.recallService.getTranscript(bot.id);
-      transcriptText = this.recallService.formatTranscriptText(transcript);
-      console.log(`✅ Transcript retrieved (${transcript.words.length} words)`);
+      // Save bot ID for later use
+      botId = bot.id;
 
-      eventTitle = 'Recall.ai Recorded Meeting';
+      // Only fetch transcript if waiting for completion
+      if (params.waitForCompletion !== false) {
+        // Get transcript
+        console.log('📝 Fetching transcript from Recall.ai...');
+        const transcript = await this.recallService.getTranscript(bot.id);
+        transcriptText = this.recallService.formatTranscriptText(transcript);
+        console.log(`✅ Transcript retrieved (${transcript.words.length} words)`);
+
+        eventTitle = 'Recall.ai Recorded Meeting';
+      } else {
+        // Bot started but not waiting for completion
+        console.log(`✅ Bot started: ${bot.id}`);
+        console.log('⏸️  Not waiting for completion. Use --bot ${bot.id} to process later.');
+
+        // Return early without generating minutes
+        return {
+          minutes: {
+            summary: '',
+            keyPoints: [],
+            decisions: [],
+            actionItems: [],
+            participants: [],
+            rawTranscript: '',
+            generatedAt: new Date().toISOString(),
+          },
+          slackPosted: false,
+          errors: [],
+          botId: bot.id,
+        };
+      }
     } else if (params.audioFilePath || params.audioFilePaths) {
       // Use Whisper for audio file transcription
       if (!this.whisperService) {
@@ -243,6 +271,7 @@ export class MeetingOrchestrator {
       notionUrl,
       slackPosted,
       errors,
+      botId,
     };
   }
 
