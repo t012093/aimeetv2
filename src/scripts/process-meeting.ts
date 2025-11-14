@@ -573,6 +573,52 @@ function formatResult(result: any): string {
   lines.push('📝 概要:');
   lines.push(result.minutes.summary + '\n');
 
+  // Interview-specific fields (if present)
+  if (result.minutes.aiEvaluation) {
+    const evaluation = result.minutes.aiEvaluation;
+    lines.push('🤖 AI判定:');
+    lines.push(`  ⭐ ${evaluation.recommendation} (${evaluation.overallScore}/100点)\n`);
+  }
+
+  if (result.minutes.candidateProfile) {
+    const profile = result.minutes.candidateProfile;
+    lines.push('👤 候補者プロフィール:');
+    lines.push(`  氏名: ${profile.name}`);
+    if (profile.age) lines.push(`  年齢: ${profile.age}`);
+    lines.push(`  状況: ${profile.currentSituation}`);
+    lines.push(`  応募理由: ${profile.whyNow}`);
+    lines.push('');
+  }
+
+  if (result.minutes.aiEvaluation) {
+    const evaluation = result.minutes.aiEvaluation;
+    lines.push('📊 評価詳細:');
+    if (evaluation.criteria) {
+      lines.push(`  スキル適合度: ${evaluation.criteria.skillMatch.score}/20`);
+      lines.push(`  カルチャーフィット: ${evaluation.criteria.cultureFit.score}/20`);
+      lines.push(`  モチベーション: ${evaluation.criteria.motivation.score}/20`);
+      lines.push(`  コミットメント: ${evaluation.criteria.commitment.score}/20`);
+      lines.push(`  コミュニケーション: ${evaluation.criteria.communication.score}/20`);
+    }
+    lines.push('');
+
+    if (evaluation.strengths && evaluation.strengths.length > 0) {
+      lines.push('  採用すべき理由:');
+      evaluation.strengths.forEach((s: string) => {
+        lines.push(`    ✅ ${s}`);
+      });
+      lines.push('');
+    }
+
+    if (evaluation.risks && evaluation.risks.length > 0) {
+      lines.push('  懸念点:');
+      evaluation.risks.forEach((r: string) => {
+        lines.push(`    ⚠️ ${r}`);
+      });
+      lines.push('');
+    }
+  }
+
   if (result.minutes.keyPoints.length > 0) {
     lines.push('💡 重要なポイント:');
     result.minutes.keyPoints.forEach((point: string) => {
