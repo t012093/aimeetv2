@@ -30,6 +30,37 @@ function question(prompt: string): Promise<string> {
   });
 }
 
+async function selectProjectType(): Promise<string> {
+  console.log('\n📁 Select project type:');
+  console.log('1. 🌍 国際交流 (International Exchange)');
+  console.log('2. 💻 プログラミング教室 (Programming Class)');
+  console.log('3. 🎨 アート支援 (Art Support)');
+  console.log('4. 📋 デフォルト (Default)');
+  console.log('');
+
+  const choice = await question('Enter choice (1-4): ');
+
+  const projectMap: Record<string, string> = {
+    '1': 'international',
+    '2': 'programming',
+    '3': 'art',
+    '4': 'default',
+  };
+
+  const projectType = projectMap[choice] || 'default';
+
+  const emojiMap: Record<string, string> = {
+    'international': '🌍',
+    'programming': '💻',
+    'art': '🎨',
+    'default': '📋',
+  };
+
+  console.log(`\n✅ Selected: ${emojiMap[projectType]} ${projectType}\n`);
+
+  return projectType;
+}
+
 async function main() {
   console.log('🎙️  AIMeet Quick Record\n');
   console.log('='.repeat(60));
@@ -141,14 +172,18 @@ async function handleCalendarEvent() {
 
   const outputPath = await question('Output file (default: minutes.txt): ') || 'minutes.txt';
 
-  console.log('\n🤖 Sending bot to meeting...\n');
+  // Select project type
+  const projectType = await selectProjectType();
+
+  console.log('🤖 Sending bot to meeting...\n');
 
   const minutesGenerator = createMinutesGeneratorFromEnv();
-  const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator);
+  const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator, projectType);
 
   const result = await orchestrator.processMeeting({
     meetingUrl: selectedEvent.meetLink,
     waitForCompletion: true,
+    projectType: projectType as any,
   });
 
   await saveResult(result, outputPath);
@@ -158,15 +193,19 @@ async function handleMeetingUrl() {
   const meetUrl = await question('\n🔗 Enter Google Meet URL: ');
   const outputPath = await question('Output file (default: minutes.txt): ') || 'minutes.txt';
 
-  console.log('\n🤖 Sending bot to meeting...\n');
+  // Select project type
+  const projectType = await selectProjectType();
+
+  console.log('🤖 Sending bot to meeting...\n');
 
   const authService = createAuthServiceFromEnv();
   const minutesGenerator = createMinutesGeneratorFromEnv();
-  const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator);
+  const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator, projectType);
 
   const result = await orchestrator.processMeeting({
     meetingUrl: meetUrl,
     waitForCompletion: true,
+    projectType: projectType as any,
   });
 
   await saveResult(result, outputPath);
@@ -176,14 +215,18 @@ async function handleAudioFile() {
   const audioPath = await question('\n🎵 Enter audio file path: ');
   const outputPath = await question('Output file (default: minutes.txt): ') || 'minutes.txt';
 
-  console.log('\n📝 Processing audio file...\n');
+  // Select project type
+  const projectType = await selectProjectType();
+
+  console.log('📝 Processing audio file...\n');
 
   const authService = createAuthServiceFromEnv();
   const minutesGenerator = createMinutesGeneratorFromEnv();
-  const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator);
+  const orchestrator = await createOrchestratorFromEnv(authService, minutesGenerator, projectType);
 
   const result = await orchestrator.processMeeting({
     audioFilePath: audioPath,
+    projectType: projectType as any,
   });
 
   await saveResult(result, outputPath);

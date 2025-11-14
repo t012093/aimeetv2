@@ -25,6 +25,7 @@ export interface BotConfig {
   };
   realtimeTranscription?: boolean;
   webhookEvents?: string[];
+  metadata?: Record<string, any>; // Custom metadata for the bot
 }
 
 export interface Bot {
@@ -34,6 +35,7 @@ export interface Bot {
   status_changes: StatusChange[];
   media_retention_end?: string;
   recordings?: any[];
+  metadata?: Record<string, any>;
 }
 
 export interface StatusChange {
@@ -148,6 +150,11 @@ export class RecallService {
     }
 
     requestBody.recording_config = recordingConfig;
+
+    // Add metadata if provided
+    if (config.metadata) {
+      requestBody.metadata = config.metadata;
+    }
 
     console.log(`🤖 Creating Recall.ai bot for: ${config.meetingUrl}`);
 

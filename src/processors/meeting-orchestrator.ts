@@ -81,6 +81,7 @@ export class MeetingOrchestrator {
 
     let transcriptText: string;
     let eventTitle = 'Untitled Meeting';
+    let projectType = params.projectType || 'default';
 
     // 1. Get transcript (from Google Meet API, Whisper, or Recall.ai bot)
     if (params.meetingUrl || params.botId) {
@@ -95,15 +96,30 @@ export class MeetingOrchestrator {
         // Use existing bot
         console.log(`🤖 Fetching bot: ${params.botId}`);
         bot = await this.recallService.getBot(params.botId);
+
+        // Try to get projectType from bot metadata if not explicitly provided
+        if (!params.projectType && bot.metadata?.projectType) {
+          projectType = bot.metadata.projectType;
+          console.log(`📁 Project type from bot metadata: ${projectType}`);
+        }
       } else if (params.meetingUrl) {
         // Create new bot and send to meeting
         console.log(`🤖 Creating bot for meeting: ${params.meetingUrl}`);
+
+        // Include projectType in bot metadata
+        const metadata: Record<string, any> = {};
+        if (projectType && projectType !== 'default') {
+          metadata.projectType = projectType;
+          console.log(`📁 Project type: ${projectType}`);
+        }
+
         bot = await this.recallService.createBot({
           meetingUrl: params.meetingUrl,
           botName: 'AIMeet Recorder',
           transcriptionProvider: 'recallai_streaming',
           transcriptionLanguage: 'ja', // Japanese
           transcriptionMode: 'prioritize_accuracy',
+          metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
         });
 
         // Wait for bot to finish if requested
@@ -210,10 +226,9 @@ export class MeetingOrchestrator {
     if (this.slackService) {
       try {
         console.log('📢 Posting to Slack...');
-        const projectType = (params.projectType as any) || 'default';
-        await this.slackService.postMeetingMinutes(eventTitle, minutes, notionUrl, meetLink, projectType);
+        await this.slackService.postMeetingMinutes(eventTitle, minutes, notionUrl, meetLink, projectType as any);
         slackPosted = true;
-        const channel = this.slackService.getChannelForProject(projectType);
+        const channel = this.slackService.getChannelForProject(projectType as any);
         console.log(`✅ Posted to Slack (#${channel})`);
       } catch (error) {
         errors.push(`Failed to post to Slack: ${error}`);
