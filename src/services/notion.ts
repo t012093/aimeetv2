@@ -542,7 +542,7 @@ export class NotionService {
 /**
  * Project types for different Notion databases
  */
-export type ProjectType = 'international' | 'programming' | 'art' | 'default';
+export type ProjectType = 'international' | 'programming' | 'art' | 'interview' | 'default';
 
 /**
  * Get database ID for a specific project type
@@ -552,6 +552,7 @@ export function getDatabaseIdForProject(projectType: ProjectType): string {
     international: process.env.NOTION_INTERNATIONAL_DATABASE_ID,
     programming: process.env.NOTION_PROGRAMMING_DATABASE_ID,
     art: process.env.NOTION_ART_DATABASE_ID,
+    interview: process.env.NOTION_INTERVIEW_DATABASE_ID,
     default: process.env.NOTION_MEETING_DATABASE_ID,
   };
 

@@ -35,16 +35,18 @@ async function selectProjectType(): Promise<string> {
   console.log('1. 🌍 国際交流 (International Exchange)');
   console.log('2. 💻 プログラミング教室 (Programming Class)');
   console.log('3. 🎨 アート支援 (Art Support)');
-  console.log('4. 📋 デフォルト (Default)');
+  console.log('4. 💼 面接 (Interview)');
+  console.log('5. 📋 デフォルト (Default)');
   console.log('');
 
-  const choice = await question('Enter choice (1-4): ');
+  const choice = await question('Enter choice (1-5): ');
 
   const projectMap: Record<string, string> = {
     '1': 'international',
     '2': 'programming',
     '3': 'art',
-    '4': 'default',
+    '4': 'interview',
+    '5': 'default',
   };
 
   const projectType = projectMap[choice] || 'default';
@@ -53,6 +55,7 @@ async function selectProjectType(): Promise<string> {
     'international': '🌍',
     'programming': '💻',
     'art': '🎨',
+    'interview': '💼',
     'default': '📋',
   };
 

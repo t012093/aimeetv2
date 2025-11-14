@@ -29,12 +29,14 @@ export class SlackService {
       international: process.env.SLACK_INTERNATIONAL_CHANNEL || 'general',
       programming: process.env.SLACK_PROGRAMMING_CHANNEL || 'general',
       art: process.env.SLACK_ART_CHANNEL || 'general',
+      interview: process.env.SLACK_INTERVIEW_CHANNEL || 'general',
       default: process.env.SLACK_DEFAULT_CHANNEL || 'general',
     };
     this.webhookUrlMapping = webhookUrlMapping || {
       international: process.env.SLACK_WEBHOOK_URL_INTERNATIONAL || webhookUrl,
       programming: process.env.SLACK_WEBHOOK_URL_PROGRAMMING || webhookUrl,
       art: process.env.SLACK_WEBHOOK_URL_ART || webhookUrl,
+      interview: process.env.SLACK_WEBHOOK_URL_INTERVIEW || webhookUrl,
       default: webhookUrl,
     };
   }
@@ -109,6 +111,7 @@ export class SlackService {
       international: '🌍',
       programming: '💻',
       art: '🎨',
+      interview: '💼',
       default: '📋',
     }[projectType];
 
@@ -116,6 +119,7 @@ export class SlackService {
       international: '国際交流',
       programming: 'プログラミング教室',
       art: 'アート支援',
+      interview: '面接',
       default: '会議',
     }[projectType];
 

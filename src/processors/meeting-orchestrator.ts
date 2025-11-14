@@ -32,7 +32,7 @@ export interface ProcessMeetingParams {
   // Common
   calendarEventId?: string;
   templateName?: 'default' | 'npo' | 'government';
-  projectType?: 'international' | 'programming' | 'art' | 'default';
+  projectType?: 'international' | 'programming' | 'art' | 'interview' | 'default';
   context?: any; // Additional context for template
   method?: TranscriptionMethod; // Explicit method selection
 }
@@ -338,7 +338,7 @@ export async function createOrchestratorFromEnv(
   if (process.env.NOTION_API_KEY) {
     try {
       const { createNotionServiceFromEnv } = await import('../services/notion.js');
-      type ProjectType = 'international' | 'programming' | 'art' | 'default';
+      type ProjectType = 'international' | 'programming' | 'art' | 'interview' | 'default';
       const validProjectType = (projectType as ProjectType) || 'default';
       notionService = createNotionServiceFromEnv(validProjectType);
     } catch (error) {
