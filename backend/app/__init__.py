@@ -1,0 +1,1 @@
+"""SIFUT Backend Application"""
